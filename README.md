@@ -1,3 +1,5 @@
+<h1 align="center"><img src="/images/migrate_bitbucket_server_to_bitbucket_cloud.png" alt="Migrate Atlassian Bitbucket Server to Bitbucket Cloud" width=500 height=342></h1>
+
 <h2 align="center">Migrate Atlassian Bitbucket Server to Bitbucket Cloud</h2>
 
 [![Build Status](https://travis-ci.org/swoodford/migrate_bitbucket_server_to_bitbucket_cloud.svg?branch=master)](https://travis-ci.org/swoodford/migrate_bitbucket_server_to_bitbucket_cloud)
