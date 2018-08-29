@@ -2,17 +2,17 @@
 
 [![Build Status](https://travis-ci.org/swoodford/migrate_bitbucket_server_to_bitbucket_cloud.svg?branch=master)](https://travis-ci.org/swoodford/migrate_bitbucket_server_to_bitbucket_cloud)
 
-#### [https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud](https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud)
+[https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud](https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud)
 
 
-**Requirements:**
+**Requirements:**  
 Requires curl, git, jq, bc, openssl
 
 
 #### TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
 YOU MUST AGREE TO ALL TERMS IN [APACHE LICENSE 2.0](https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud/blob/master/LICENSE.md)
 THIS WORK IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND
-YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISKS ASSOCIATED WITH RUNNING THIS WORK
+YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISKS ASSOCIATED WITH RUNNING THIS WORK  
 
 
 ### Steps for use:
@@ -32,7 +32,7 @@ YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISK
 5. Add new git remote cloud, push all branches to cloud
 6. Send email to git committers when each repo is migrated
 
-#### Or migration can be done in phases with specific projects and repos (see notes in script)
+#### Or migration can be done in phases with specific projects and repos (see notes in script)  
 
 
 ## Bugs and feature requests
