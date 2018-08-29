@@ -6,13 +6,13 @@
 
 
 **Requirements:**
-### Requires curl, git, jq, bc, openssl
+Requires curl, git, jq, bc, openssl
 
 
-### TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
-#### YOU MUST AGREE TO ALL TERMS IN [APACHE LICENSE 2.0](https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud/blob/master/LICENSE.md)
-#### THIS WORK IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND
-#### YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISKS ASSOCIATED WITH RUNNING THIS WORK
+#### TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
+YOU MUST AGREE TO ALL TERMS IN [APACHE LICENSE 2.0](https://github.com/swoodford/migrate_bitbucket_server_to_bitbucket_cloud/blob/master/LICENSE.md)
+THIS WORK IS PROVIDED ON AN "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND
+YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISKS ASSOCIATED WITH RUNNING THIS WORK
 
 
 ### Steps for use:
@@ -23,7 +23,7 @@
 4. Set all required variables then run ./migrate.sh
 
 
-## Migration process works in the following way:
+### Migration process works in the following way:
 
 1. Get list of all Projects and Repos from Bitbucket Server
 2. Create new Project in Bitbucket Cloud
