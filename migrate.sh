@@ -6,6 +6,7 @@
 # https://github.com/swoodford
 
 # Requires curl, git, jq, bc openssl
+# It is recommended to run this script as root directly on your Bitbucket Server (Linux only)
 
 
 # TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
@@ -20,6 +21,7 @@
 # Create OAuth Consumer in Bitbucket Cloud with Full Permisions to Team Account
 # Create Admin or System Admin level user for migration on your Bitbucket Server
 # Set all required variables below then run ./migrate.sh
+
 
 # Migration process works in the following way:
 # Get list of all Projects and Repos from Bitbucket Server
@@ -854,23 +856,32 @@ HorizontalRule
 echo
 echo
 
+
+# Prepare to run on Bitbucket Server
 bitbucketServer
 
-# # Migrate Phases
+
+
+# Migrate All
+if $migrateALL; then
+	migrateALL
+fi
+
+
+# Migrate Phases
+if $migratePhases; then
+	# PHASEFILE="phase1.txt"
+	migratePhases
+fi
+
+
+# # Migrate Multiple Phases
 if $migrateMultiplePhases; then
 	for PHASENUMBER in {$NumberOfPhases..1}; do
 		cd "$SCRIPTDIR"
 		migratePhases
 	done
 fi
-
-# PHASEFILE="phase1.txt"
-if $migratePhases; then
-	migratePhases
-fi
-
-# Migrate all
-migrateALL
 
 
 # Log the Date/Time again when completed

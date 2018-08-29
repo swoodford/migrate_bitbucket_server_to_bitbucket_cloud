@@ -6,7 +6,9 @@
 
 
 **Requirements:**  
-Requires curl, git, jq, bc, openssl
+It is recommended to run this script as `root` directly on your Bitbucket Server (Linux only)  
+Requires `curl, git, jq, bc, openssl`  
+Run `install_requirements.sh` to install these packages  
 
 
 #### TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
