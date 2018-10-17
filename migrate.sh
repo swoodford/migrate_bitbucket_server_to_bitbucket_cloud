@@ -549,7 +549,7 @@ function migrateALL(){
 		fi
 
 		# Count number of repos in the project
-		NUMSLUGS=$(echo "$SLUG" | wc -l | tr -d '\040\011\012\015')
+		[[ -z "$SLUG" ]] && NUMSLUGS="0" || NUMSLUGS=$(echo "$SLUG" | wc -l | tr -d '\040\011\012\015')
 		if $DEBUGMODE; then
 			echo "NumSlugs:" "$NUMSLUGS"
 		fi
