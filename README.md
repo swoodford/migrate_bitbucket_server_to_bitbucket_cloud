@@ -11,6 +11,7 @@
 It is recommended to run this script as `root` directly on your Bitbucket Server (Linux only)  
 Requires `curl, git, jq, bc, openssl`  
 Run `install_requirements.sh` to install these packages  
+The migration script may work on Mac OS but this has not been tested so run at your own risk!  
 
 
 #### TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION:
@@ -24,7 +25,7 @@ YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISK
 1. Create Bitbucket Cloud Account and Setup Team
 2. Create OAuth Consumer in Bitbucket Cloud with Full Permisions to Team Account
 3. Create Admin or System Admin level user for migration on your Bitbucket Server
-4. Set all required variables then run ./migrate.sh
+4. Set all required variables in the script `migrate.sh` then run `./migrate.sh`
 
 
 ### Migration process works in the following way:
@@ -34,7 +35,7 @@ YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISK
 3. Create new Repo in Cloud
 4. Backup each Project Repo and all branches locally using git
 5. Add new git remote cloud, push all branches to cloud
-6. Send email to git committers when each repo is migrated
+6. Send email to git committers when each repo is migrated (optional)
 
 #### Or migration can be done in phases with specific projects and repos (see notes in script)  
 

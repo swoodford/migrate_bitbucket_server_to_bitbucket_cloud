@@ -40,13 +40,14 @@
 # Protocol and Hostname or Protocol and Hostname and Port of your Bitbucket Server Frontend
 SERVERHOSTNAME="https://git.example.com:8443"
 
-# Bitbucket Server API URL - Hostname and Rest API path (this script has only been tested with API version 1.0)
+# Bitbucket Server API URL - Hostname and Rest API path (this script has only been tested with Server API version 1.0)
 SERVERAPIURL="$SERVERHOSTNAME/rest/api/1.0"
 
 # Hostname or Hostname and Port of your Bitbucket Server Git Clone URL
 SERVERGITCLONEURL="ssh://git@git.example.com:7999"
 
 # Username and password for Bitbucket Server account with Admin or System Admin level permissions on your Bitbucket Server
+# This user must be able to read all Projects and all Repos in order to backup & migrate the entire server to cloud
 SERVERAPIUSER="admin"
 SERVERAPIPASS="password"
 
@@ -59,19 +60,22 @@ LIMIT="1000"
 ############################
 
 # Username and password for account with Team Admin level permissions on your Bitbucket Cloud account
+# This user must be able to create new Projects and Repos in the cloud team account in order to run the migration
 CLOUDAPIUSER="username@example.com"
 CLOUDAPIPASS="cloudpassword"
 
 # Your Bitbucket Cloud account Team name
 CLOUDAPITEAM="exampleteam"
 
-# Bitbucket Cloud API URL - Protocol and Hostname and Rest API path (this script has only been tested with API version 2.0)
+# Bitbucket Cloud API URL - Protocol and Hostname and Rest API path (this script has only been tested with Cloud API version 2.0)
 CLOUDAPIURL="https://api.bitbucket.org/2.0"
 CLOUDGITCLONEURL="git@bitbucket.org"
 
 # Bitbucket Cloud OAuth consumer credentials
 # You must create an OAuth consumer with full cloud account permissions at this URL:
-# https://bitbucket.org/account/user/YOURTEAMNAME/oauth-consumers/new
+# https://bitbucket.org/account/user/YOURCLOUDAPITEAM/oauth-consumers/new
+# (You must set a Callback URL, set it to https://bitbucket.org/ for example)
+# (Check all Permissions boxes to avoid any issues)
 OAuthKey="key"
 OAuthSecret="secret"
 OAuthURL="https://bitbucket.org/site/oauth2/access_token"
@@ -93,20 +97,14 @@ if ! [ -d $REPOBACKUPDIR ]; then
 	mkdir "$REPOBACKUPDIR"
 fi
 
-# A local directory where email templates will be generated and stored
-EMAILDIR="/root/bitbucket-emails"
-if ! [ -d $EMAILDIR ]; then
-	mkdir "$EMAILDIR"
-fi
-
 # Optionally skip migrating any Git LFS repos that require manual conversion to Git LFS format
 # Any repo that is over 2GB in size cannot be migrated to cloud without converting to Git LFS
 # List repo slugs using vertical bar (|) as separator
-LFSREPOS="example_LFS_repo_slug1|example_LFS_repo_slug2"
+# LFSREPOS="example_LFS_repo_slug1|example_LFS_repo_slug2"
 
 # Optionally skip migrating any repos that have already been migrated
 # List repo slugs using vertical bar (|) as separator
-MIGRATEDREPOS="example_repo_slug_to_skip1|example_repo_slug_to_skip2"
+# MIGRATEDREPOS="example_repo_slug_to_skip1|example_repo_slug_to_skip2"
 
 # Determines the directory where this script is running from, don't change this
 SCRIPTDIR=$(cd -P -- "$(dirname -- "$0")" && pwd -P)
@@ -124,13 +122,13 @@ migrateALL=true
 # Project Keys and Repo Slugs separated by a TAB in the text file set in variable PHASEFILE
 # This was designed to use values pasted from a spreadsheet with one or more rows containing projects and repo slugs
 migratePhases=false
-PHASEFILE="phase1.txt"
+# PHASEFILE="phase1.txt"
 # PHASENUMBER="1"
 
 # OR using migrateMultiplePhases which will migrate multiple phases at a time by iterating over each phase file
 migrateMultiplePhases=false
 # Number of sequential phases to migrate, requires having PHASEFILES like "phase1.txt, phase2.txt, etc."
-NumberOfPhases="1"
+# NumberOfPhases="1"
 
 
 ############################
@@ -152,6 +150,12 @@ EMAIL_FROM_DOMAIN="domain.com"
 AWS_SMTP_Username="smtpuser"
 AWS_SMTP_Password="smtppass"
 AWSSESHostname="email-smtp.us-east-1.amazonaws.com:587"
+
+# A local directory where email templates will be generated and stored
+EMAILDIR="/root/bitbucket-emails"
+if ! [ -d $EMAILDIR ]; then
+	mkdir "$EMAILDIR"
+fi
 
 
 ############################
@@ -189,6 +193,7 @@ function HorizontalRule(){
 	echo "============================================================"
 }
 
+# Checks git for updates to the migration repo
 function self_update(){
 	cd "$( dirname "${BASH_SOURCE[0]}" )"
 	if ! git pull | egrep -iq "Already up-to-date.|Already up to date."; then
@@ -196,7 +201,6 @@ function self_update(){
 		exit 0
 	fi
 }
-
 
 # Needed if running on Bitbucket Server
 function bitbucketServer(){
