@@ -25,7 +25,7 @@ YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISK
 1. Create Bitbucket Cloud Account and Setup Team
 2. Create OAuth Consumer in Bitbucket Cloud with Full Permisions to Team Account
 3. Create Admin or System Admin level user for migration on your Bitbucket Server
-4. Set all required variables in the script `migrate.sh` then run `./migrate.sh`
+4. Set all required variables in the script [migrate.sh](migrate.sh) then run `./migrate.sh`
 
 
 ### Migration process works in the following way:
@@ -38,6 +38,9 @@ YOU AGREE TO ACCEPT ALL LIABILITY IN USING THIS WORK AND ASSUME ANY AND ALL RISK
 6. Send email to git committers when each repo is migrated (optional)
 
 #### Or migration can be done in phases with specific projects and repos (see notes in script)  
+
+### Post migration:
+1. Update many local machine git repo URLs to Bitbucket Cloud URLs by running [update-git-repo-urls.sh](update-git-repo-urls.sh)
 
 
 ## Bugs and feature requests
