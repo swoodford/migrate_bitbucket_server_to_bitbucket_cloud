@@ -92,10 +92,8 @@ DEBUGMODE=false
 CUTOFFYEAR="2000"
 
 # A local directory with plenty of free space to perform a git clone of all repos as a backup prior to migration to cloud
-REPOBACKUPDIR="/root/bitbucket-backups"
-if ! [ -d $REPOBACKUPDIR ]; then
-	mkdir "$REPOBACKUPDIR"
-fi
+REPOBACKUPDIR="~/bitbucket-backups"
+
 
 # Optionally skip migrating any Git LFS repos that require manual conversion to Git LFS format
 # Any repo that is over 2GB in size cannot be migrated to cloud without converting to Git LFS
@@ -132,7 +130,7 @@ migrateMultiplePhases=false
 
 
 ############################
-# SEND EMAILS USING AWS SES
+# SEND EMAILS USING AWS SES (OPTIONAL)
 ############################
 
 # Optionally Send an Email to Git Committers using OpenSSL TLS Client and AWS SES with IAM Credentials
@@ -152,10 +150,7 @@ AWS_SMTP_Password="smtppass"
 AWSSESHostname="email-smtp.us-east-1.amazonaws.com:587"
 
 # A local directory where email templates will be generated and stored
-EMAILDIR="/root/bitbucket-emails"
-if ! [ -d $EMAILDIR ]; then
-	mkdir "$EMAILDIR"
-fi
+EMAILDIR="~/bitbucket-emails"
 
 
 ############################
@@ -199,6 +194,25 @@ function self_update(){
 	if ! git pull | egrep -iq "Already up-to-date.|Already up to date."; then
 		echo "Update found, please re-run this script."
 		exit 0
+	fi
+}
+
+# Check Required Paths
+function pathCheck(){
+	if ! [ -d "$REPOBACKUPDIR" ]; then
+		mkdir "$REPOBACKUPDIR"
+		if [ ! $? -eq 0 ]; then
+			fail "Unable to make REPOBACKUPDIR: $REPOBACKUPDIR"
+		fi
+	fi
+
+	if [ "$SENDEMAILS" == true ]; then
+		if ! [ -d "$EMAILDIR" ]; then
+			mkdir "$EMAILDIR"
+			if [ ! $? -eq 0 ]; then
+				fail "Unable to make EMAILDIR: $EMAILDIR"
+			fi
+		fi
 	fi
 }
 
@@ -443,8 +457,17 @@ function migratePhases(){
 		SLUG="$REPO"
 		THISSLUG="$SLUG"
 
-		# Do not migrate LFS repos >2GB!!!
-		if ! echo "$THISSLUG" | egrep -iq "$LFSREPOS"; then
+		# Check if LFSREPOS is set
+		function migratePhasesLFSCheck(){
+			if [ ! -z "$LFSREPOS" ] && [ echo "$THISSLUG" | egrep -iq "$LFSREPOS" ]; then
+				# LFSREPOS IS SET, Do not migrate LFS repos >2GB!!!
+				warning "LFS Repo $THISSLUG will not be migrated!"
+				break
+			else
+				if $DEBUGMODE; then
+					echo "LFSREPOS is not set, Skipping LFS check."
+				fi
+			fi
 			# If the slug path exists then run the backup function
 			if [ -d $REPOBACKUPDIR/$PROJECTKEY/$SLUG ]; then
 				if $DEBUGMODE; then
@@ -508,9 +531,8 @@ function migratePhases(){
 					echo "Repo year $YEAR is older than cutoff year $CUTOFFYEAR.  Not migrating $THISSLUG to cloud!"
 				fi
 			fi
-		else
-			warning "LFS Repo $THISSLUG will not be migrated!"
-		fi
+		}
+		migratePhasesLFSCheck
 	done
 }
 
@@ -564,13 +586,28 @@ function migrateALL(){
 		if [ "$NUMSLUGS" -eq "1" ]; then
 			echo "Repo:" "$SLUG"
 			THISSLUG="$SLUG"
-
-			# Do not migrate repos that are already migrated and using cloud!!!
-			if ! echo "$THISSLUG" | egrep -iq "$MIGRATEDREPOS"; then
-
-				# Do not migrate LFS repos >2GB!!!
-				if ! echo "$THISSLUG" | egrep -iq "$LFSREPOS"; then
-
+			# Check if MIGRATEDREPOS is set
+			function migrateALLOneRepoMIGRATEDREPOSCheck(){
+				# Do not migrate repos that are already migrated and using cloud!!!
+				if [ ! -z "$MIGRATEDREPOS" ] && [ ! echo "$THISSLUG" | egrep -iq "$MIGRATEDREPOS" ]; then
+					warning "Repo $THISSLUG has already been migrated to cloud!"
+					break
+				else
+					if $DEBUGMODE; then
+						echo "MIGRATEDREPOS is not set, Skipping check."
+					fi
+				fi
+				# Check if LFSREPOS is set
+				function migrateALLOneRepoLFSCheck(){
+					if [ ! -z "$LFSREPOS" ] && [ echo "$THISSLUG" | egrep -iq "$LFSREPOS" ]; then
+						# LFSREPOS IS SET, Do not migrate LFS repos >2GB!!!
+						warning "LFS Repo $THISSLUG will not be migrated!"
+						break
+					else
+						if $DEBUGMODE; then
+							echo "LFSREPOS is not set, Skipping LFS check."
+						fi
+					fi
 					# If the slug path exists then run the backup function
 					if [ -d $REPOBACKUPDIR/$PROJECTKEY/$SLUG ]; then
 						if $DEBUGMODE; then
@@ -625,12 +662,10 @@ function migrateALL(){
 							echo "Repo year $YEAR is older than cutoff year $CUTOFFYEAR.  Not migrating $THISSLUG to cloud!"
 						fi
 					fi
-				else
-					warning "LFS Repo $THISSLUG will not be migrated!"
-				fi
-			else
-				warning "Repo $THISSLUG has already been migrated to cloud!"
-			fi
+				}
+				migrateALLOneRepoLFSCheck
+			}
+			migrateALLOneRepoMIGRATEDREPOSCheck
 		fi
 
 		# Case: Multiple Repos in the Project
@@ -645,12 +680,28 @@ function migrateALL(){
 			for (( SLUGCOUNT=$STARTSLUG; SLUGCOUNT<=$NUMSLUGS; SLUGCOUNT++ )); do
 				THISSLUG=$(echo "$SLUG" | nl | grep -w [^0-9][[:space:]]$SLUGCOUNT | cut -f2)
 
-				# Do not migrate repos that are already migrated and using cloud!!!
-				if ! echo "$THISSLUG" | egrep -iq "$MIGRATEDREPOS"; then
-
-					# Do not migrate LFS repos >2GB!!!
-					if ! echo "$THISSLUG" | egrep -iq "$LFSREPOS"; then
-
+				# Check if MIGRATEDREPOS is set
+				function migrateALLMultipleReposMIGRATEDREPOSCheck(){
+					# Do not migrate repos that are already migrated and using cloud!!!
+					if [ ! -z "$MIGRATEDREPOS" ] && [ ! echo "$THISSLUG" | egrep -iq "$MIGRATEDREPOS" ]; then
+						warning "Repo $THISSLUG has already been migrated to cloud!"
+						break
+					else
+						if $DEBUGMODE; then
+							echo "MIGRATEDREPOS is not set, Skipping check."
+						fi
+					fi
+					# Check if LFSREPOS is set
+					function migrateALLMultipleReposLFSCheck(){
+						if [ ! -z "$LFSREPOS" ] && [ echo "$THISSLUG" | egrep -iq "$LFSREPOS" ]; then
+							# LFSREPOS IS SET, Do not migrate LFS repos >2GB!!!
+							warning "LFS Repo $THISSLUG will not be migrated!"
+							break
+						else
+							if $DEBUGMODE; then
+								echo "LFSREPOS is not set, Skipping LFS check."
+							fi
+						fi
 						# If the slug path does exist then run the backup function
 						if [ -d $REPOBACKUPDIR/$PROJECTKEY/$THISSLUG ]; then
 							if $DEBUGMODE; then
@@ -728,12 +779,10 @@ function migrateALL(){
 							fi
 							# done
 						fi
-					else
-						warning "LFS Repo $THISSLUG will not be migrated!"
-					fi
-				else
-					warning "Repo $THISSLUG has already been migrated to cloud!"
-				fi
+					}
+					migrateALLMultipleReposLFSCheck
+				}
+				migrateALLMultipleReposMIGRATEDREPOSCheck
 			done
 		fi
 
@@ -842,9 +891,11 @@ fi
 # Update the backup script
 self_update
 
-
 # Check for required applications
 check_command curl git jq bc openssl
+
+# Check for required paths
+pathCheck
 
 # Log the Date/Time
 echo
